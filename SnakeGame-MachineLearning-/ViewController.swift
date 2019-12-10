@@ -21,6 +21,8 @@ class ViewController: UIViewController {
     var leftEdgeNumber: Set<Int> = [0, 17, 34, 51, 68, 85, 102, 119, 136, 153, 170, 187, 204, 221, 238, 255, 272, 289]
     var topRowNumber: Set<Int> =  [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     var bottomRowNumber: Set<Int> = [289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305]
+    var failierPattern: Set<[Int]> = LearningData().data
+    var currentPattern = [Int]()
     
     fileprivate let collectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
@@ -48,7 +50,7 @@ class ViewController: UIViewController {
         if button.titleLabel?.text == "Start" {
             count = 0
             button.setTitle("Reset", for: .normal)
-            gameTimer = Timer.scheduledTimer(timeInterval: 0.005, target: self, selector: #selector(createBoard), userInfo: nil, repeats: true)
+            gameTimer = Timer.scheduledTimer(timeInterval: 0.0001, target: self, selector: #selector(createBoard), userInfo: nil, repeats: true)
         } else {
             for pixel in cellCollection {
                 pixel.backgroundColor = .white
@@ -75,7 +77,7 @@ class ViewController: UIViewController {
             let startingPoint = cellCollection.randomElement()!
             startingPoint.backgroundColor = .green
             snakeArr.append(startingPoint)
-            gameTimer = Timer.scheduledTimer(timeInterval: 0.051, target: self, selector: #selector(startMoving), userInfo: nil, repeats: true)
+            gameTimer = Timer.scheduledTimer(timeInterval: 0.05, target: self, selector: #selector(startMoving), userInfo: nil, repeats: true)
         }
     }
     
@@ -124,51 +126,100 @@ extension ViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDa
 extension ViewController {
     func moveSnake() {
         var movablePixel = false
+        var randomMovement: Set<Int> = possibleMove()
         var movingDirection = 0
-        var randomMovement: Set<Int> = [1, -1, 17, -17]
         while movablePixel == false {
             movingDirection = randomMovement.remove(randomMovement.randomElement()!)!
-            if snakeBodyPixel(movementNumber: movingDirection, tagNumber: snakeArr.last!.tag) { //  && movingDirection + snakeArr.last!.tag != previous
-                movablePixel = true
-            } else if randomMovement.isEmpty {
-                gameTimer?.invalidate()
-                snakeArr = []
-                print("dead end")
-                break
+            //if snakeBodyPixel(movementNumber: movingDirection, tagNumber: snakeArr.last!.tag) {
+                addToCurrentMovingPattern(movingDirection)
+                if currentPattern.count >= 4 && failierPattern.contains(currentPattern) && !randomMovement.isEmpty {
+                    print("patern changed")
+                    continue
+                } else {
+                    movablePixel = true
+                }
             }
-        }
         
-        if !randomMovement.isEmpty {
+        if movablePixel == true {
             if cellCollection[(snakeArr[snakeArr.count - 1].tag) + (movingDirection)].backgroundColor == .red {
-                cellCollection[(snakeArr[snakeArr.count - 1].tag) + (movingDirection)].backgroundColor = .green
+                cellCollection[(snakeArr[snakeArr.count - 1].tag) + (movingDirection)].backgroundColor = .blue
+                snakeArr.last!.backgroundColor = .green
                 snakeArr.append(cellCollection[(snakeArr[snakeArr.count - 1].tag) + (movingDirection)])
-                randomMovement = []
                 sponeFood()
                 scoreCount += 1
-            }
-        }
-        
-        if !randomMovement.isEmpty {
-            for (index, pixel) in snakeArr.enumerated() where cellCollection[(snakeArr[snakeArr.count - 1].tag) + (movingDirection)].backgroundColor != .red {
-                if index == 0 && snakeArr.count > 1 {
-                    snakeArr[index].backgroundColor = .black
-                    snakeArr[index] = snakeArr[index + 1]
-                    snakeArr[index].backgroundColor = .green
-                } else if pixel != snakeArr.last {
-                    snakeArr[index] = snakeArr[index + 1]
-                    snakeArr[index].backgroundColor = .green
-                } else if snakeArr.count == 1 {
-                    snakeArr[index].backgroundColor = .black
-                    snakeArr[index] = cellCollection[(pixel.tag) + (movingDirection)]
-                    snakeArr[index].backgroundColor = .green
-                } else {
-                    snakeArr[index] = cellCollection[(pixel.tag) + (movingDirection)]
-                    snakeArr[index].backgroundColor = .green
+            } else {
+                for (index, pixel) in snakeArr.enumerated() where cellCollection[(snakeArr[snakeArr.count - 1].tag) + (movingDirection)].backgroundColor != .red {
+                    if index == 0 && snakeArr.count > 1 {
+                        snakeArr[index].backgroundColor = .black
+                        snakeArr[index] = snakeArr[index + 1]
+                        snakeArr[index].backgroundColor = .green
+                    } else if snakeArr.count == 1{
+                        snakeArr[index].backgroundColor = .black
+                        snakeArr[index] = cellCollection[(pixel.tag) + (movingDirection)]
+                        snakeArr[index].backgroundColor = .green
+                    } else if pixel != snakeArr.last {
+                        snakeArr[index] = snakeArr[index + 1]
+                        snakeArr[index].backgroundColor = .green
+                    } else {
+                        snakeArr[index] = cellCollection[(pixel.tag) + (movingDirection)]
+                        snakeArr[index].backgroundColor = .blue
+                    }
                 }
             }
         }
-        print(scoreCount)
-        print("pixelSet: \(pixelSet)")
+        
+        print(failierPattern)
+        print(currentPattern)
+        print("===============================")
+        
+        if possibleMove().isEmpty {
+            learn()
+        }
+    }
+    
+    func learn() {
+        gameTimer?.invalidate()
+        failierPattern.insert(currentPattern)
+        currentPattern = []
+        
+        for cell in cellCollection {
+            if cell.backgroundColor == .black {
+                cellCount = 0
+                scoreCount = 0
+                count = 0
+                snakeArr = []
+                pixelSet = []
+                print("+++++++++++")
+                print("dead end")
+                print("+++++++++++")
+                gameTimer = Timer.scheduledTimer(timeInterval: 0.05, target: self, selector: #selector(createBoard), userInfo: nil, repeats: true)
+                return
+            }
+        }
+        print("The snake was completed")
+    }
+    
+    func possibleMove() -> Set<Int> {
+        var number: Set<Int> = [1, -1, 17, -17]
+        var result = Set<Int>()
+        while !number.isEmpty {
+            let randomNum = number.remove(number.randomElement()!)!
+            if snakeBodyPixel(movementNumber: randomNum, tagNumber: snakeArr.last!.tag) {
+                result.insert(randomNum)
+            }
+        }
+        return result
+    }
+    
+    func addToCurrentMovingPattern(_ movingDirection: Int) {
+        if currentPattern.count < 12 {
+            currentPattern.append(movingDirection)
+        } else {
+            for num in 0..<10 {
+                currentPattern[num] = currentPattern[num + 1]
+            }
+            currentPattern[10] = movingDirection
+        }
     }
     
     func snakeBodyPixel(movementNumber: Int, tagNumber: Int) -> Bool {
