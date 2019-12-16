@@ -73,13 +73,13 @@ class ViewController: UIViewController {
         
         if cellCount == 306 {
             gameTimer?.invalidate()
-            for _ in 0..<10 {
-                cellCollection.randomElement()?.backgroundColor = .red
-            }
+//            for _ in 0..<10 {
+//                cellCollection.randomElement()?.backgroundColor = .red
+//            }
             let startingPoint = cellCollection.randomElement()!
             startingPoint.backgroundColor = .green
             snakeArr.append(startingPoint)
-            gameTimer = Timer.scheduledTimer(timeInterval: 0.05, target: self, selector: #selector(startMoving), userInfo: nil, repeats: true)
+            gameTimer = Timer.scheduledTimer(timeInterval: 0.00005, target: self, selector: #selector(startMoving), userInfo: nil, repeats: true)
         }
     }
     
@@ -105,7 +105,9 @@ class ViewController: UIViewController {
 
 extension ViewController: UICollectionViewDelegateFlowLayout, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: 19, height: 19)
+        let viewWidth = view.frame.width
+        let size = CGSize(width: (viewWidth/20), height: (viewWidth/20))
+        return size
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -143,11 +145,11 @@ extension ViewController {
             }
         
         if movablePixel == true {
-            if cellCollection[(snakeArr[snakeArr.count - 1].tag) + (movingDirection)].backgroundColor == .red {
+            if sponeRed >= 20 {
                 cellCollection[(snakeArr[snakeArr.count - 1].tag) + (movingDirection)].backgroundColor = .blue
                 snakeArr.last!.backgroundColor = .green
                 snakeArr.append(cellCollection[(snakeArr[snakeArr.count - 1].tag) + (movingDirection)])
-                sponeFood()
+                sponeRed = 1
             } else {
                 for (index, pixel) in snakeArr.enumerated() where cellCollection[(snakeArr[snakeArr.count - 1].tag) + (movingDirection)].backgroundColor != .red {
                     if index == 0 && snakeArr.count > 1 {
@@ -167,6 +169,7 @@ extension ViewController {
                     }
                 }
             }
+            sponeRed += 1
         }
   
         print(failierPattern)
@@ -193,7 +196,7 @@ extension ViewController {
                 print("+++++++++++")
                 print("dead end")
                 print("+++++++++++")
-                gameTimer = Timer.scheduledTimer(timeInterval: 0.05, target: self, selector: #selector(createBoard), userInfo: nil, repeats: true)
+                gameTimer = Timer.scheduledTimer(timeInterval: 0.00005, target: self, selector: #selector(createBoard), userInfo: nil, repeats: true)
                 return
             }
         }
