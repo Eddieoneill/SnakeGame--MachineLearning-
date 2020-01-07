@@ -55,10 +55,6 @@
             }
             sponeRed += 1
         }
-  
-//        print(failierPattern)
-//        print(currentPattern)
-//        print("===============================")
         
         if possibleMove().isEmpty {
             learn()
