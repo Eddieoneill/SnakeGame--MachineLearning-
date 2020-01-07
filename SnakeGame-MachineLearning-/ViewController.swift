@@ -51,7 +51,7 @@ class ViewController: UIViewController {
         if button.titleLabel?.text == "Start" {
             count = 0
             button.setTitle("Reset", for: .normal)
-            gameTimer = Timer.scheduledTimer(timeInterval: 0.0000001, target: self, selector: #selector(createBoard), userInfo: nil, repeats: true)
+            gameTimer = Timer.scheduledTimer(timeInterval: 0.00001, target: self, selector: #selector(createBoard), userInfo: nil, repeats: true)
         } else {
             for pixel in cellCollection {
                 pixel.backgroundColor = .white
@@ -79,7 +79,7 @@ class ViewController: UIViewController {
             let startingPoint = cellCollection.randomElement()!
             startingPoint.backgroundColor = .green
             snakeArr.append(startingPoint)
-            gameTimer = Timer.scheduledTimer(timeInterval: 0.00005, target: self, selector: #selector(startMoving), userInfo: nil, repeats: true)
+            gameTimer = Timer.scheduledTimer(timeInterval: 0.025, target: self, selector: #selector(startMoving), userInfo: nil, repeats: true)
         }
     }
     
@@ -172,9 +172,9 @@ extension ViewController {
             sponeRed += 1
         }
   
-        print(failierPattern)
-        print(currentPattern)
-        print("===============================")
+//        print(failierPattern)
+//        print(currentPattern)
+//        print("===============================")
         
         if possibleMove().isEmpty {
             learn()
@@ -196,7 +196,7 @@ extension ViewController {
                 print("+++++++++++")
                 print("dead end")
                 print("+++++++++++")
-                gameTimer = Timer.scheduledTimer(timeInterval: 0.00005, target: self, selector: #selector(createBoard), userInfo: nil, repeats: true)
+                gameTimer = Timer.scheduledTimer(timeInterval: 0.0005, target: self, selector: #selector(createBoard), userInfo: nil, repeats: true)
                 return
             }
         }
