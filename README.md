@@ -1,6 +1,67 @@
 # SnakeGame-MachineLearning-
 
+## Description
+
 - The MachineLearning method I wrote will track the current length of the snake and will store the data when the snake dies(gets trapped)
 - Not like the actual game the snake will increes it's size by one every 10 movement until it can't move anymore
 
 ![SnakeGame-MachineLearningGIF](https://user-images.githubusercontent.com/42211866/71905634-8a821f80-3136-11ea-8792-7896339eda18.gif)
+
+## Challenges
+- The most challenging part of this project was to build a method to learn from it's mistake and not take the same move from the next time.
+- the code below is mostly about the possible movement for the snake but moving the body to the direction the head moved was pretty challenging as well
+
+```swift
+    func moveSnake() {
+        var movablePixel = false
+        var randomMovement: Set<Int> = possibleMove()
+        var movingDirection = 0
+        while movablePixel == false {
+            movingDirection = randomMovement.remove(randomMovement.randomElement()!)!
+            //if snakeBodyPixel(movementNumber: movingDirection, tagNumber: snakeArr.last!.tag) {
+                addToCurrentMovingPattern(movingDirection)
+            if currentPattern.count >= 4 && failierPattern.contains(currentPattern) && !randomMovement.isEmpty {
+                    print("patern changed")
+                    continue
+                } else {
+                    movablePixel = true
+                }
+            }
+        
+        if movablePixel == true {
+            if sponeRed >= 20 {
+                cellCollection[(snakeArr[snakeArr.count - 1].tag) + (movingDirection)].backgroundColor = .blue
+                snakeArr.last!.backgroundColor = .green
+                snakeArr.append(cellCollection[(snakeArr[snakeArr.count - 1].tag) + (movingDirection)])
+                sponeRed = 1
+            } else {
+                for (index, pixel) in snakeArr.enumerated() where cellCollection[(snakeArr[snakeArr.count - 1].tag) + (movingDirection)].backgroundColor != .red {
+                    if index == 0 && snakeArr.count > 1 {
+                        snakeArr[index].backgroundColor = .black
+                        snakeArr[index] = snakeArr[index + 1]
+                        snakeArr[index].backgroundColor = .green
+                    } else if snakeArr.count == 1{
+                        snakeArr[index].backgroundColor = .black
+                        snakeArr[index] = cellCollection[(pixel.tag) + (movingDirection)]
+                        snakeArr[index].backgroundColor = .green
+                    } else if pixel != snakeArr.last {
+                        snakeArr[index] = snakeArr[index + 1]
+                        snakeArr[index].backgroundColor = .green
+                    } else {
+                        snakeArr[index] = cellCollection[(pixel.tag) + (movingDirection)]
+                        snakeArr[index].backgroundColor = .blue
+                    }
+                }
+            }
+            sponeRed += 1
+        }
+  
+//        print(failierPattern)
+//        print(currentPattern)
+//        print("===============================")
+        
+        if possibleMove().isEmpty {
+            learn()
+        }
+    }
+```
