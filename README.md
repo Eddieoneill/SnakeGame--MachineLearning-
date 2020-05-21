@@ -18,7 +18,6 @@
         var movingDirection = 0
         while movablePixel == false {
             movingDirection = randomMovement.remove(randomMovement.randomElement()!)!
-            //if snakeBodyPixel(movementNumber: movingDirection, tagNumber: snakeArr.last!.tag) {
                 addToCurrentMovingPattern(movingDirection)
             if currentPattern.count >= 4 && failierPattern.contains(currentPattern) && !randomMovement.isEmpty {
                     print("patern changed")
